@@ -225,7 +225,7 @@ class S3 extends DataObject
                 'Key' => $filename
             ]);
         } catch (\Exception $e) {
-            $logger->debug("Eception in s3 saveFile File".print_r($e->getAwsErrorMessage(),true));
+            $this->logger->debug("Eception in s3 saveFile File".print_r($e->getAwsErrorMessage(),true));
         }
 
         return $this;
@@ -246,7 +246,7 @@ class S3 extends DataObject
                 'ACL' => 'public-read'
             ]);
         } catch (S3Exception $e) {
-            $logger->debug("Eception in s3 copyFile File".print_r($e->getAwsErrorMessage(),true));
+            $this->logger->debug("Eception in s3 copyFile File".print_r($e->getAwsErrorMessage(),true));
         }
         return $this;
     }
@@ -266,7 +266,7 @@ class S3 extends DataObject
                 'Key' => $oldFilePath
             ]);
         } catch (S3Exception $e) {
-            $logger->debug("Eception in s3 rename File".print_r($e->getAwsErrorMessage(),true));
+            $this->logger->debug("Eception in s3 rename File".print_r($e->getAwsErrorMessage(),true));
         }
         return $this;
     }
@@ -285,7 +285,7 @@ class S3 extends DataObject
                 'Key' =>  $path
             ]);
         } catch (S3Exception $e) {
-            $logger->debug("Eception in s3 deleteFile File".print_r($e->getAwsErrorMessage(),true));
+            $this->logger->debug("Eception in s3 deleteFile File".print_r($e->getAwsErrorMessage(),true));
         }
 
         return $this;
