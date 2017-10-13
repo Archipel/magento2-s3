@@ -56,14 +56,16 @@ class S3 extends DataObject
         $this->storageHelper = $storageHelper;
         $this->logger = $logger;
 
-        $this->client = new \Aws\S3\S3Client([
-            'version' => 'latest',
-            'region' => $this->helper->getRegion(),
-            'credentials' => [
-                'key' => $this->helper->getAccessKey(),
-                'secret' => $this->helper->getSecretKey()
-            ]
-        ]);
+        if($this->helper->getRegion() && $this->helper->getAccessKey() != null && $this->helper->getSecretKey() != null){
+            $this->client = new \Aws\S3\S3Client([
+                'version' => 'latest',
+                'region' => $this->helper->getRegion(),
+                'credentials' => [
+                    'key' => $this->helper->getAccessKey(),
+                    'secret' => $this->helper->getSecretKey()
+                ]
+            ]);
+        }
     }
 
     /**
