@@ -1,6 +1,7 @@
 <?php
 namespace Arkade\S3\Model\MediaStorage\File\Storage;
 
+use Aws\Exception\AwsException;
 use Aws\S3\Exception\S3Exception;
 use Magento\Framework\DataObject;
 
@@ -43,6 +44,11 @@ class S3 extends DataObject
 
     private $objects = [];
 
+    /**
+     * Metadata of the file to be passed to S3
+     */
+    private $metadata;
+
     public function __construct(
         \Arkade\S3\Helper\Data $helper,
         \Magento\MediaStorage\Helper\File\Media $mediaHelper,
@@ -55,6 +61,14 @@ class S3 extends DataObject
         $this->mediaHelper = $mediaHelper;
         $this->storageHelper = $storageHelper;
         $this->logger = $logger;
+
+        $tempMetaData = $this->helper->getMetaData();
+        if($tempMetaData == null){
+            $this->metadata = [];
+        }
+        else{
+            $this->metadata = json_decode($tempMetaData);
+        }
 
         if($this->helper->getRegion() && $this->helper->getAccessKey() != null && $this->helper->getSecretKey() != null){
             $this->client = new \Aws\S3\S3Client([
@@ -203,7 +217,8 @@ class S3 extends DataObject
                     'Body' => $file['content'],
                     'Bucket' => $this->getBucket(),
                     'ContentType' => \GuzzleHttp\Psr7\mimetype_from_filename($file['filename']),
-                    'Key' => $file['directory'] . '/' . $file['filename']
+                    'Key' => $file['directory'] . '/' . $file['filename'],
+                    'Metadata' => $this->metadata
                 ]);
             } catch (\Exception $e) {
                 $this->errors[] = $e->getMessage();
@@ -224,10 +239,19 @@ class S3 extends DataObject
                 'Body' => $file['content'],
                 'Bucket' => $this->getBucket(),
                 'ContentType' => \GuzzleHttp\Psr7\mimetype_from_filename($file['filename']),
-                'Key' => $filename
+                'Key' => $filename,
+                'Metadata' => $this->metadata
             ]);
         } catch (\Exception $e) {
-            $this->logger->debug("Eception in s3 saveFile File".print_r($e->getAwsErrorMessage(),true));
+
+            $errorMessage = null;
+            if($e instanceof AwsException){
+                $errorMessage = $e->getAwsErrorMessage();
+            }
+            else{
+                $errorMessage = $e->getMessage();
+            }
+            $this->logger->debug("Exception in s3 saveFile File ".print_r($errorMessage) ,true);
         }
 
         return $this;
@@ -245,10 +269,18 @@ class S3 extends DataObject
                 'Bucket' => $this->getBucket(),
                 'Key' => $newFilePath,
                 'CopySource' => $this->getBucket() . '/' . $oldFilePath,
-                'ACL' => 'public-read'
+                'ACL' => 'public-read',
+                'Metadata' => $this->metadata
             ]);
         } catch (S3Exception $e) {
-            $this->logger->debug("Eception in s3 copyFile File".print_r($e->getAwsErrorMessage(),true));
+            $errorMessage = null;
+            if($e instanceof AwsException){
+                $errorMessage = $e->getAwsErrorMessage();
+            }
+            else{
+                $errorMessage = $e->getMessage();
+            }
+            $this->logger->debug("Exception in s3 copyFile File ".print_r($errorMessage) ,true);
         }
         return $this;
     }
@@ -260,7 +292,8 @@ class S3 extends DataObject
                 'Bucket' => $this->getBucket(),
                 'Key' => $newFilePath,
                 'CopySource' => $this->getBucket() . '/' . $oldFilePath,
-                'ACL' => 'public-read'
+                'ACL' => 'public-read',
+                'Metadata' => $this->metadata
             ]);
 
             $this->client->deleteObject([
@@ -268,7 +301,15 @@ class S3 extends DataObject
                 'Key' => $oldFilePath
             ]);
         } catch (S3Exception $e) {
-            $this->logger->debug("Eception in s3 rename File".print_r($e->getAwsErrorMessage(),true));
+            $errorMessage = null;
+            if($e instanceof AwsException){
+                $errorMessage = $e->getAwsErrorMessage();
+            }
+            else{
+                $errorMessage = $e->getMessage();
+            }
+
+            $this->logger->debug("Exception in s3 rename File".print_r($errorMessage),true);
         }
         return $this;
     }
@@ -287,7 +328,14 @@ class S3 extends DataObject
                 'Key' =>  $path
             ]);
         } catch (S3Exception $e) {
-            $this->logger->debug("Eception in s3 deleteFile File".print_r($e->getAwsErrorMessage(),true));
+            $errorMessage = null;
+            if($e instanceof AwsException){
+                $errorMessage = $e->getAwsErrorMessage();
+            }
+            else{
+                $errorMessage = $e->getMessage();
+            }
+            $this->logger->debug("Eception in s3 deleteFile File".print_r($errorMessage),true);
         }
 
         return $this;
@@ -381,4 +429,6 @@ class S3 extends DataObject
         }
         return $this->mediaBaseDirectory;
     }
+
+
 }

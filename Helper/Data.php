@@ -21,6 +21,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $this->useS3;
     }
 
+    public function getMetaData()
+    {
+        return $this->scopeConfig->getValue('arkade_s3/general/metadata');
+    }
+
     public function getAccessKey()
     {
         return $this->scopeConfig->getValue('arkade_s3/general/access_key');

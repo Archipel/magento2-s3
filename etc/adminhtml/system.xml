@@ -23,6 +23,9 @@
                     <label>Region</label>
                     <source_model>Arkade\S3\Model\Config\Source\Region</source_model>
                 </field>
+                <field id="metadata" type="textarea" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Metadata</label>
+                </field>
             </group>
         </section>
     </system>
