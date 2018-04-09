@@ -265,12 +265,15 @@ class S3 extends DataObject
     public function copyFile($oldFilePath, $newFilePath)
     {
         try {
+            $tempMetaData = $this->metadata;
+            //$tempMetaData = ['Key'=>$newFilePath];
             $this->client->copyObject([
                 'Bucket' => $this->getBucket(),
                 'Key' => $newFilePath,
                 'CopySource' => $this->getBucket() . '/' . $oldFilePath,
                 'ACL' => 'public-read',
-                'Metadata' => $this->metadata
+                'Metadata' => $tempMetaData,
+                'MetadataDirective'=>'REPLACE'
             ]);
         } catch (S3Exception $e) {
             $errorMessage = null;
@@ -280,7 +283,7 @@ class S3 extends DataObject
             else{
                 $errorMessage = $e->getMessage();
             }
-            $this->logger->debug("Exception in s3 copyFile File ".print_r($errorMessage) ,true);
+            $this->logger->debug("Exception in s3 copyFile File ".json_encode($errorMessage).json_encode($tempMetaData));
         }
         return $this;
     }
@@ -293,13 +296,14 @@ class S3 extends DataObject
                 'Key' => $newFilePath,
                 'CopySource' => $this->getBucket() . '/' . $oldFilePath,
                 'ACL' => 'public-read',
-                'Metadata' => $this->metadata
+                'Metadata' => $this->metadata,
+                'MetadataDirective'=>'REPLACE'
             ]);
 
-            $this->client->deleteObject([
+            /*$this->client->deleteObject([
                 'Bucket' => $this->getBucket(),
                 'Key' => $oldFilePath
-            ]);
+            ]);*/
         } catch (S3Exception $e) {
             $errorMessage = null;
             if($e instanceof AwsException){
@@ -309,7 +313,7 @@ class S3 extends DataObject
                 $errorMessage = $e->getMessage();
             }
 
-            $this->logger->debug("Exception in s3 rename File".print_r($errorMessage),true);
+            $this->logger->debug("Exception in s3 rename File".json_encode($errorMessage));
         }
         return $this;
     }
@@ -335,7 +339,7 @@ class S3 extends DataObject
             else{
                 $errorMessage = $e->getMessage();
             }
-            $this->logger->debug("Eception in s3 deleteFile File".print_r($errorMessage),true);
+            $this->logger->debug("Eception in s3 deleteFile File".json_encode($errorMessage));
         }
 
         return $this;
@@ -432,3 +436,4 @@ class S3 extends DataObject
 
 
 }
+
