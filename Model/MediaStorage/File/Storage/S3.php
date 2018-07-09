@@ -72,6 +72,7 @@ class S3 extends DataObject
 
         if($this->helper->getRegion() && $this->helper->getAccessKey() != null && $this->helper->getSecretKey() != null){
             $this->client = new \Aws\S3\S3Client([
+                'endpoint' => $this->helper->getEndpoint(),
                 'version' => 'latest',
                 'region' => $this->helper->getRegion(),
                 'credentials' => [

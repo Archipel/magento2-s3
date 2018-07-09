@@ -45,4 +45,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         return $this->scopeConfig->getValue('arkade_s3/general/bucket');
     }
+
+    public function getEndpoint(){
+        return $this->scopeConfig->getValue('arkade_s3/general/endpoint');
+    }
 }
